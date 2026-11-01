@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Friends App – Social Networking & Random Connection</title>
+  <!-- Tailwind CSS via CDN for instant high-fidelity rendering -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857'
+            },
+            vip: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706'
+            }
+          },
+          animation: {
+            'radar-wave-1': 'radar 2.4s cubic-bezier(0, 0, 0.2, 1) infinite',
+            'radar-wave-2': 'radar 2.4s cubic-bezier(0, 0, 0.2, 1) 0.8s infinite',
+            'radar-wave-3': 'radar 2.4s cubic-bezier(0, 0, 0.2, 1) 1.6s infinite',
+            'pulse-fast': 'pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            radar: {
+              '0%': { transform: 'scale(0.8)', opacity: '0.8' },
+              '100%': { transform: 'scale(2.6)', opacity: '0' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- Top App Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-brand-500/20">
+        <i data-lucide="users" class="w-6 h-6 text-white"></i>
+      </div>
+      <div>
+        <span class="text-xl font-bold bg-gradient-to-r from-white via-slate-100 to-emerald-400 bg-clip-text text-transparent">Friends App</span>
+        <span class="hidden md:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20">Production Platform</span>
+      </div>
+    </div>
+
+    <!-- Active User & Role Controls -->
+    <div class="flex items-center space-x-3">
+      <!-- Quick Demo Role Switcher -->
+      <div class="hidden sm:flex items-center bg-slate-800/80 p-1 rounded-lg border border-slate-700/80 text-xs">
+        <span class="text-slate-400 px-2 font-medium">Switch Persona:</span>
+        <button onclick="switchRole('usr-alex-01')" id="btn-role-alex" class="px-2.5 py-1 rounded bg-brand-600 text-white font-medium transition">Alex (Gold VIP)</button>
+        <button onclick="switchRole('usr-sam-02')" id="btn-role-sam" class="px-2.5 py-1 rounded text-slate-300 hover:text-white transition">Sam (Silver)</button>
+        <button onclick="switchRole('usr-david-03')" id="btn-role-david" class="px-2.5 py-1 rounded text-slate-300 hover:text-white transition">David (Free)</button>
+        <button onclick="switchRole('usr-celeb-01')" id="btn-role-celeb" class="px-2.5 py-1 rounded text-vip-400 hover:text-white transition">Aria (Celebrity)</button>
+        <button onclick="switchRole('usr-admin-01')" id="btn-role-admin" class="px-2.5 py-1 rounded text-purple-400 hover:text-white transition">Super Admin</button>
+      </div>
+
+      <!-- Theme Switcher -->
+      <button onclick="toggleTheme()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition" title="Toggle Theme">
+        <i data-lucide="moon" id="theme-icon" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Active Profile Pill -->
+      <div id="user-header-pill" class="flex items-center space-x-2 pl-2 pr-3 py-1 bg-slate-800/80 border border-slate-700/80 rounded-full">
+        <img id="header-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" class="w-7 h-7 rounded-full object-cover border border-brand-500" />
+        <div class="text-left leading-tight hidden md:block">
+          <p id="header-name" class="text-xs font-semibold text-white">Alex Morgan</p>
+          <p id="header-plan" class="text-[10px] text-vip-400 font-medium">Gold VIP Plan</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace Layout -->
+  <div class="flex-1 flex overflow-hidden">
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0 hidden lg:flex">
+      <div class="p-4 space-y-1">
+        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-3 pb-2">Main Navigation</p>
+        <button onclick="navigateTo('home')" id="nav-home" class="nav-item flex items-center space-x-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition text-white bg-brand-600/20 text-brand-400 border border-brand-500/30">
+          <i data-lucide="compass" class="w-4 h-4"></i>
+          <span>Home / Discover</span>
+        </button>
+        <button onclick="navigateTo('find-friends')" id="nav-find-friends" class="nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-400 hover:text-slate-100 hover:bg-slate-800/60">
+          <div class="flex items-center space-x-3">
+            <i data-lucide="radar" class="w-4 h-4 text-brand-400"></i>
+            <span>Find Friends</span>
+          </div>
+          <span class="w-2 h-2 rounded-full bg-brand-500 animate-ping"></span>
+        </button>
+        <button onclick="navigateTo('my-friends')" id="nav-my-friends" class="nav-item flex items-center space-x-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-400 hover:text-slate-100 hover:bg-slate-800/60">
+          <i data-lucide="user-check" class="w-4 h-4"></i>
+          <span>My Friends</span>
+        </button>
+        <button onclick="navigateTo('events')" id="nav-events" class="nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-400 hover:text-slate-100 hover:bg-slate-800/60">
+          <div class="flex items-center space-x-3">
+            <i data-lucide="calendar" class="w-4 h-4 text-pink-400"></i>
+            <span>Events & Tickets</span>
+          </div>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300 font-bold">Nearby</span>
+        </button>
+        <button onclick="navigateTo('celebrities')" id="nav-celebrities" class="nav-item flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-400 hover:text-slate-100 hover:bg-slate-800/60">
+          <div class="flex items-center space-x-3">
+            <i data-lucide="sparkles" class="w-4 h-4 text-vip-400"></i>
+            <span>Celebrity VIP</span>
+          </div>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-vip-500/20 text-vip-300 font-bold">VIP Call</span>
+        </button>
+        <button onclick="navigateTo('premium')" id="nav-premium" class="nav-item flex items-center space-x-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-400 hover:text-slate-100 hover:bg-slate-800/60">
+          <i data-lucide="crown" class="w-4 h-4 text-yellow-400"></i>
+          <span>Memberships & Plans</span>
+        </button>
+        
+        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-3 pt-4 pb-2">Staff & Management</p>
+        <button onclick="navigateTo('support')" id="nav-support" class="nav-item flex items-center space-x-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-400 hover:text-slate-100 hover:bg-slate-800/60">
+          <i data-lucide="headset" class="w-4 h-4 text-sky-400"></i>
+          <span>Helpdesk / Support</span>
+        </button>
+        <button onclick="navigateTo('admin')" id="nav-admin" class="nav-item flex items-center space-x-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-400 hover:text-slate-100 hover:bg-slate-800/60">
+          <i data-lucide="shield-alert" class="w-4 h-4 text-purple-400"></i>
+          <span>Super Admin Console</span>
+        </button>
+      </div>
+
+      <!-- Calling Permissions Summary Box -->
+      <div class="p-4 border-t border-slate-800/80 bg-slate-950/40 m-3 rounded-2xl border">
+        <div class="flex items-center justify-between text-xs mb-2">
+          <span class="font-bold text-slate-300">Calling Permission HUD</span>
+          <span id="hud-credits" class="text-vip-400 font-bold">35 Credits</span>
+        </div>
+        <div class="space-y-1.5 text-[11px]">
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Normal Audio Call:</span>
+            <span id="hud-audio-perm" class="text-emerald-400 font-semibold flex items-center"><i data-lucide="check" class="w-3 h-3 mr-0.5"></i> Allowed</span>
+          </div>
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Normal Video Call:</span>
+            <span class="text-red-400 font-semibold flex items-center" title="Strictly forbidden across all normal users"><i data-lucide="ban" class="w-3 h-3 mr-0.5"></i> Prohibited</span>
+          </div>
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Celebrity VIP Video:</span>
+            <span id="hud-vip-perm" class="text-vip-400 font-semibold flex items-center"><i data-lucide="crown" class="w-3 h-3 mr-0.5"></i> Gold VIP</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-950" id="main-content">
+
+      <!-- ============================================== -->
+      <!-- SECTION 1: HOME & QUICK ACTIONS               -->
+      <!-- ============================================== -->
+      <div id="section-home" class="space-y-6">
+        <!-- Hero Banner -->
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-900/60 via-slate-900 to-slate-900 border border-brand-500/20 p-6 md:p-8">
+          <div class="max-w-2xl relative z-10 space-y-4">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/20 text-brand-400 border border-brand-500/30">Connect & Socialize</span>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Discover New Friends Worldwide Through Instant Matchmaking</h1>
+            <p class="text-slate-300 text-sm md:text-base leading-relaxed">Meet verified people with matching hobbies, join high-definition voice conversations, discover local concerts & events, and interact with your favorite VIP celebrities.</p>
+            <div class="flex flex-wrap gap-3 pt-2">
+              <button onclick="navigateTo('find-friends')" class="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold flex items-center space-x-2 shadow-lg shadow-brand-600/30 transition transform hover:-translate-y-0.5">
+                <i data-lucide="radar" class="w-5 h-5"></i>
+                <span>Start Finding Friends</span>
+              </button>
+              <button onclick="navigateTo('events')" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold flex items-center space-x-2 border border-slate-700 transition">
+                <i data-lucide="map-pin" class="w-4 h-4 text-pink-400"></i>
+                <span>Explore Nearby Events</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800/80">
+            <div class="flex items-center justify-between text-slate-400 mb-2">
+              <span class="text-xs font-semibold uppercase">Online Friends</span>
+              <i data-lucide="radio" class="w-4 h-4 text-emerald-400"></i>
+            </div>
+            <p class="text-2xl font-bold text-white">4 Online</p>
+            <span class="text-xs text-emerald-400">Ready to chat</span>
+          </div>
+          <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800/80">
+            <div class="flex items-center justify-between text-slate-400 mb-2">
+              <span class="text-xs font-semibold uppercase">Plan Status</span>
+              <i data-lucide="award" class="w-4 h-4 text-vip-400"></i>
+            </div>
+            <p id="stat-plan-name" class="text-2xl font-bold text-vip-400">Gold VIP</p>
+            <span class="text-xs text-slate-400">Unlimited Voice & VIP Video</span>
+          </div>
+          <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800/80">
+            <div class="flex items-center justify-between text-slate-400 mb-2">
+              <span class="text-xs font-semibold uppercase">Calling Credits</span>
+              <i data-lucide="coins" class="w-4 h-4 text-amber-400"></i>
+            </div>
+            <p id="stat-credits" class="text-2xl font-bold text-white">35 Credits</p>
+            <span class="text-xs text-slate-400">Valid for VIP calls</span>
+          </div>
+          <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800/80">
+            <div class="flex items-center justify-between text-slate-400 mb-2">
+              <span class="text-xs font-semibold uppercase">Digital Tickets</span>
+              <i data-lucide="ticket" class="w-4 h-4 text-pink-400"></i>
+            </div>
+            <p id="stat-tickets" class="text-2xl font-bold text-white">1 Pass</p>
+            <span class="text-xs text-pink-400">Confirmed Booking</span>
+          </div>
+        </div>
+
+        <!-- Calling Matrix Alert Banner -->
+        <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start space-x-3">
+          <i data-lucide="shield-check" class="w-5 h-5 text-amber-400 shrink-0 mt-0.5"></i>
+          <div class="text-xs text-slate-300">
+            <strong class="text-amber-300 font-semibold block mb-0.5">Calling System Permissions Notice:</strong>
+            Normal users can make audio calls based on active memberships. Normal user-to-user video calling is disabled across the platform. Video calls are exclusively reserved for verified VIP Celebrity sessions with active Gold memberships.
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- SECTION 2: FIND FRIENDS (RADAR)               -->
+      <!-- ============================================== -->
+      <div id="section-find-friends" class="hidden space-y-6">
+        <div class="text-center max-w-xl mx-auto space-y-2">
+          <h2 class="text-3xl font-extrabold text-white">Random Friend Matchmaking</h2>
+          <p class="text-slate-400 text-sm">Click search to find available online users with shared interests. Preview profiles before connecting.</p>
+        </div>
+
+        <!-- Radar Animation Container -->
+        <div class="relative w-80 h-80 mx-auto flex items-center justify-center my-8">
+          <!-- Animated Concentric Radar Waves -->
+          <div id="radar-wave-1" class="absolute inset-0 rounded-full border-2 border-brand-500/40 animate-radar-wave-1 pointer-events-none"></div>
+          <div id="radar-wave-2" class="absolute inset-0 rounded-full border-2 border-brand-500/30 animate-radar-wave-2 pointer-events-none"></div>
+          <div id="radar-wave-3" class="absolute inset-0 rounded-full border-2 border-brand-500/20 animate-radar-wave-3 pointer-events-none"></div>
+          
+          <!-- Static Concentric Rings -->
+          <div class="absolute w-64 h-64 rounded-full border border-slate-800"></div>
+          <div class="absolute w-44 h-44 rounded-full border border-slate-800/80"></div>
+          <div class="absolute w-24 h-24 rounded-full border border-slate-700/80"></div>
+
+          <!-- Radar Center Button -->
+          <button onclick="toggleRadarSearch()" id="btn-radar" class="relative z-10 w-24 h-24 rounded-full bg-gradient-to-tr from-brand-600 to-emerald-400 text-white font-bold text-xs uppercase tracking-wider flex flex-col items-center justify-center shadow-xl shadow-brand-500/30 hover:scale-105 active:scale-95 transition transform">
+            <i data-lucide="search" id="radar-icon" class="w-6 h-6 mb-1"></i>
+            <span id="radar-label">Find Friend</span>
+          </button>
+        </div>
+
+        <!-- Status readout -->
+        <div class="text-center">
+          <p id="radar-status-text" class="text-sm font-semibold text-slate-400">Ready to search. Press the radar button to begin.</p>
+        </div>
+
+        <!-- Match Result Modal / Card (Hidden until match found) -->
+        <div id="match-card" class="hidden max-w-md mx-auto bg-slate-900 border border-brand-500/40 p-6 rounded-3xl shadow-2xl shadow-brand-500/10 space-y-5 animate-in fade-in zoom-in duration-300">
+          <div class="flex items-center space-x-4">
+            <img id="match-avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" class="w-16 h-16 rounded-2xl object-cover border-2 border-brand-500 shadow-md" />
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 id="match-name" class="text-lg font-bold text-white">Samantha Chen</h3>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              </div>
+              <p id="match-bio" class="text-xs text-slate-400 line-clamp-2">UX designer, book lover, indie games fan. Let’s connect and talk creative ideas!</p>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Shared Interests</p>
+            <div id="match-interests" class="flex flex-wrap gap-1.5">
+              <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">UI/UX</span>
+              <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Reading</span>
+              <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Gaming</span>
+            </div>
+          </div>
+
+          <!-- Accept / Reject Actions -->
+          <div class="flex items-center space-x-3 pt-2">
+            <button onclick="rejectMatch()" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm transition">Skip / Reject</button>
+            <button onclick="acceptMatch()" class="flex-1 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm shadow-lg shadow-brand-600/30 transition">Accept & Connect</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- SECTION 3: MY FRIENDS                         -->
+      <!-- ============================================== -->
+      <div id="section-my-friends" class="hidden space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-extrabold text-white">Connected Friends</h2>
+            <p class="text-slate-400 text-sm">Start voice calls with your connections or manage blocked profiles.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button class="px-3 py-1.5 rounded-lg bg-slate-800 text-xs font-semibold text-white border border-slate-700">All (3)</button>
+            <button class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white text-xs font-semibold">Online (2)</button>
+            <button class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white text-xs font-semibold">Blocked (0)</button>
+          </div>
+        </div>
+
+        <!-- Friends List Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Friend Card 1: Samantha Chen -->
+          <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl space-y-4 hover:border-slate-700 transition">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="relative">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" class="w-12 h-12 rounded-xl object-cover" />
+                  <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-900"></span>
+                </div>
+                <div>
+                  <h4 class="font-bold text-white text-sm">Samantha Chen</h4>
+                  <p class="text-xs text-slate-400">Oakland, CA</p>
+                </div>
+              </div>
+              <button onclick="blockUser('usr-sam-02')" class="text-slate-500 hover:text-red-400 p-1.5" title="Block User">
+                <i data-lucide="shield-ban" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <p class="text-xs text-slate-300">UX designer, book lover, indie games fan. Let’s connect and talk creative ideas!</p>
+            <div class="flex items-center space-x-2 pt-2 border-t border-slate-800">
+              <button onclick="initiateAudioCall('usr-sam-02', 'Samantha Chen')" class="flex-1 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition">
+                <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+                <span>Voice Call</span>
+              </button>
+              <button onclick="showVideoDisabledPrompt()" class="px-3 py-2 rounded-lg bg-slate-800/60 text-slate-500 hover:text-slate-400 text-xs font-medium flex items-center space-x-1 border border-slate-800" title="Video not permitted between normal users">
+                <i data-lucide="video-off" class="w-3.5 h-3.5"></i>
+                <span>Video</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Friend Card 2: David Kim -->
+          <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl space-y-4 hover:border-slate-700 transition">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="relative">
+                  <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150" class="w-12 h-12 rounded-xl object-cover" />
+                  <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-900"></span>
+                </div>
+                <div>
+                  <h4 class="font-bold text-white text-sm">David Kim</h4>
+                  <p class="text-xs text-slate-400">San Jose, CA</p>
+                </div>
+              </div>
+              <button onclick="blockUser('usr-david-03')" class="text-slate-500 hover:text-red-400 p-1.5" title="Block User">
+                <i data-lucide="shield-ban" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <p class="text-xs text-slate-300">Tech enthusiast & marathon runner. Exploring new hobbies and meeting new friends!</p>
+            <div class="flex items-center space-x-2 pt-2 border-t border-slate-800">
+              <button onclick="initiateAudioCall('usr-david-03', 'David Kim')" class="flex-1 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition">
+                <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+                <span>Voice Call</span>
+              </button>
+              <button onclick="showVideoDisabledPrompt()" class="px-3 py-2 rounded-lg bg-slate-800/60 text-slate-500 hover:text-slate-400 text-xs font-medium flex items-center space-x-1 border border-slate-800" title="Video not permitted between normal users">
+                <i data-lucide="video-off" class="w-3.5 h-3.5"></i>
+                <span>Video</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- SECTION 4: EVENTS & GEOLOCATION TICKETING     -->
+      <!-- ============================================== -->
+      <div id="section-events" class="hidden space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-extrabold text-white">Nearby Events & Festivals</h2>
+            <p class="text-slate-400 text-sm">Discover verified social gatherings, book tickets, and access your digital QR boarding passes.</p>
+          </div>
+          <!-- Category Filter Pills -->
+          <div class="flex flex-wrap gap-2">
+            <button class="px-3 py-1.5 rounded-lg bg-brand-600 text-white font-semibold text-xs">All Categories</button>
+            <button class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs">Music</button>
+            <button class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs">Parties</button>
+            <button class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs">Networking</button>
+          </div>
+        </div>
+
+        <!-- Events Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden hover:border-slate-700 transition">
+            <div class="relative h-48">
+              <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800" class="w-full h-full object-cover" />
+              <div class="absolute top-3 right-3 px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur text-pink-400 text-xs font-bold border border-pink-500/30 flex items-center space-x-1">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                <span>0.8 km away</span>
+              </div>
+            </div>
+            <div class="p-6 space-y-4">
+              <div>
+                <span class="text-xs font-bold text-brand-400 uppercase tracking-wider">Nexus Global Entertainment</span>
+                <h3 class="text-xl font-bold text-white mt-1">Neon Horizon Music & Social Festival 2026</h3>
+                <p class="text-xs text-slate-400 mt-1">Skyline Waterfront Arena • 742 Ocean Blvd, San Francisco</p>
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed">An immersive 2-day music, interactive art, and social connection experience under the skyline stars.</p>
+              <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+                <div>
+                  <span class="text-[11px] text-slate-400">Starting from</span>
+                  <p class="text-lg font-black text-white">$49.00</p>
+                </div>
+                <button onclick="openBookingModal('evt-music-fest-2026', 'Neon Horizon Music & Social Festival 2026')" class="px-5 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs shadow-lg shadow-pink-600/20 transition">
+                  Book Tickets
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Digital Ticket Pass Display -->
+        <div id="digital-ticket-box" class="bg-gradient-to-r from-slate-900 via-slate-900 to-brand-950/40 border border-brand-500/40 p-6 rounded-3xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center">
+                <i data-lucide="qr-code" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-white text-base">Your Digital Boarding Pass</h4>
+                <p class="text-xs text-slate-400">Neon Horizon Music Festival • 2 Tickets (General Admission)</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30">CONFIRMED</span>
+          </div>
+          <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 font-mono text-xs">
+            <div>
+              <p class="text-slate-400">Ticket Hash:</p>
+              <p id="ticket-qr-hash" class="text-slate-200 break-all select-all">e89a3f721c548b2910fa31294d930219842aef91204892cfa98b0210e74</p>
+            </div>
+            <button onclick="simulateScanCheckin()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-sans font-bold text-xs shrink-0 transition">
+              Simulate Gate Scan
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- SECTION 5: CELEBRITY VIP DIRECTORY            -->
+      <!-- ============================================== -->
+      <div id="section-celebrities" class="hidden space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-extrabold text-white">Celebrity VIP Network</h2>
+            <p class="text-slate-400 text-sm">Direct one-on-one VIP video calls and audio sessions with verified creators.</p>
+          </div>
+        </div>
+
+        <!-- Celebrity Showcase Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="bg-slate-900 border border-vip-500/30 rounded-3xl p-6 space-y-4 hover:border-vip-500/60 transition shadow-xl shadow-vip-500/5">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center space-x-3">
+                <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=200" class="w-16 h-16 rounded-2xl object-cover border-2 border-vip-500 shadow-md" />
+                <div>
+                  <div class="flex items-center space-x-1.5">
+                    <h3 class="font-bold text-white text-base">Aria Sterling</h3>
+                    <i data-lucide="badge-check" class="w-4 h-4 text-vip-400"></i>
+                  </div>
+                  <p class="text-xs text-vip-400 font-medium">Pop Musician & Vocalist</p>
+                  <p class="text-[11px] text-slate-400">142K Followers</p>
+                </div>
+              </div>
+              <span id="celeb-aria-status" class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">ONLINE</span>
+            </div>
+            <p class="text-xs text-slate-300">Grammy-nominated artist, live performer & acoustic songwriter. Excited to chat with my fans!</p>
+            
+            <!-- Rate box -->
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+              <div>
+                <span class="text-slate-400 text-[10px]">Audio Call:</span>
+                <p class="font-bold text-white">$4.00 / min</p>
+              </div>
+              <div class="text-right">
+                <span class="text-slate-400 text-[10px]">VIP Video Call:</span>
+                <p class="font-bold text-vip-400">$8.00 / min</p>
+              </div>
+            </div>
+
+            <!-- Call Action Buttons -->
+            <div class="flex items-center space-x-2 pt-2">
+              <button onclick="requestCelebCall('usr-celeb-01', 'Aria Sterling', 'AUDIO', 4.0)" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition">
+                <i data-lucide="phone" class="w-3.5 h-3.5 text-slate-300"></i>
+                <span>Audio Call</span>
+              </button>
+              <button onclick="requestCelebCall('usr-celeb-01', 'Aria Sterling', 'VIDEO', 8.0)" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-vip-500 to-amber-600 hover:from-vip-600 hover:to-amber-700 text-slate-950 font-black text-xs flex items-center justify-center space-x-1.5 shadow-lg shadow-vip-500/20 transition">
+                <i data-lucide="video" class="w-3.5 h-3.5"></i>
+                <span>VIP Video Call</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- SECTION 6: MEMBERSHIP PLANS & PRICING         -->
+      <!-- ============================================== -->
+      <div id="section-premium" class="hidden space-y-6">
+        <div class="text-center max-w-xl mx-auto space-y-2">
+          <h2 class="text-3xl font-extrabold text-white">Choose Your Membership Plan</h2>
+          <p class="text-slate-400 text-sm">Unlock friend audio calling, calling duration quotas, and exclusive VIP video engagements.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+          <!-- Tier 1: Free Basic -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between space-y-6">
+            <div class="space-y-4">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">Starter</span>
+              <div>
+                <h3 class="text-xl font-bold text-white">Free Basic</h3>
+                <p class="text-3xl font-black text-white mt-2">$0 <span class="text-xs text-slate-400 font-normal">/ month</span></p>
+              </div>
+              <ul class="space-y-2.5 text-xs text-slate-300">
+                <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Random Friend Radar Matchmaking</span></li>
+                <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Event Discovery & Ticket Booking</span></li>
+                <li class="flex items-center space-x-2 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i><span>User-to-User Audio Calling</span></li>
+                <li class="flex items-center space-x-2 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i><span>Celebrity VIP Video Calls</span></li>
+              </ul>
+            </div>
+            <button onclick="upgradePlan('plan-free')" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition">Active / Select Plan</button>
+          </div>
+
+          <!-- Tier 2: Silver Connect -->
+          <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 flex flex-col justify-between space-y-6">
+            <div class="space-y-4">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/20 text-brand-400 border border-brand-500/30">Popular</span>
+              <div>
+                <h3 class="text-xl font-bold text-white">Silver Connect</h3>
+                <p class="text-3xl font-black text-white mt-2">$9.99 <span class="text-xs text-slate-400 font-normal">/ month</span></p>
+              </div>
+              <ul class="space-y-2.5 text-xs text-slate-300">
+                <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Unlimited Friend Audio Calls</span></li>
+                <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>60 Daily Audio Minutes</span></li>
+                <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>10 Included Calling Credits</span></li>
+                <li class="flex items-center space-x-2 text-slate-500"><i data-lucide="x" class="w-4 h-4"></i><span>Celebrity VIP Video Calls</span></li>
+              </ul>
+            </div>
+            <button onclick="upgradePlan('plan-silver')" class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs shadow-lg shadow-brand-600/30 transition">Upgrade to Silver</button>
+          </div>
+
+          <!-- Tier 3: Gold VIP -->
+          <div class="bg-gradient-to-b from-slate-900 to-amber-950/20 border-2 border-vip-500/50 rounded-3xl p-6 flex flex-col justify-between space-y-6 relative overflow-hidden">
+            <div class="absolute -right-12 -top-12 w-32 h-32 bg-vip-500/10 rounded-full blur-2xl"></div>
+            <div class="space-y-4">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold bg-vip-500/20 text-vip-300 border border-vip-500/40">VIP Access</span>
+              <div>
+                <h3 class="text-xl font-bold text-white">Gold VIP</h3>
+                <p class="text-3xl font-black text-white mt-2">$24.99 <span class="text-xs text-slate-400 font-normal">/ month</span></p>
+              </div>
+              <ul class="space-y-2.5 text-xs text-slate-300">
+                <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Unlimited Friend Audio Calling</span></li>
+                <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Celebrity VIP Video Calling Enabled</span></li>
+                <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>50 Monthly VIP Call Credits</span></li>
+                <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Priority Matchmaking Radar</span></li>
+              </ul>
+            </div>
+            <button onclick="upgradePlan('plan-gold')" class="w-full py-3 rounded-xl bg-gradient-to-r from-vip-500 to-amber-600 hover:from-vip-600 hover:to-amber-700 text-slate-950 font-black text-xs shadow-lg shadow-vip-500/20 transition">Upgrade to Gold VIP</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- SECTION 7: SUPER ADMIN CONSOLE                -->
+      <!-- ============================================== -->
+      <div id="section-admin" class="hidden space-y-6">
+        <div>
+          <h2 class="text-2xl font-extrabold text-white">Super Admin Governance Desk</h2>
+          <p class="text-slate-400 text-sm">Platform analytics, dynamic membership plan rule configuration, and moderation.</p>
+        </div>
+
+        <!-- Dynamic Rule Configurator Card -->
+        <div class="bg-slate-900 border border-purple-500/30 rounded-3xl p-6 space-y-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <i data-lucide="sliders" class="w-6 h-6 text-purple-400"></i>
+              <div>
+                <h3 class="text-lg font-bold text-white">Dynamic Membership Rule Configurator</h3>
+                <p class="text-xs text-slate-400">Changes take effect immediately across all client WebRTC signaling gates</p>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded bg-purple-500/20 text-purple-300 font-mono text-xs">Live Sync: Active</span>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Silver Plan Controls -->
+            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <p class="font-bold text-white text-sm">Silver Connect Plan</p>
+                <p class="text-xs text-slate-400">Toggle whether normal users on Silver plan are permitted to make audio calls</p>
+              </div>
+              <div class="flex items-center space-x-3">
+                <span id="label-silver-audio" class="text-xs text-emerald-400 font-semibold">Audio Calls: ENABLED</span>
+                <button onclick="toggleAdminPlanRule('plan-silver', 'canUserAudioCall')" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition">
+                  Toggle Rule
+                </button>
+              </div>
+            </div>
+
+            <!-- Gold VIP Plan Controls -->
+            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <p class="font-bold text-white text-sm">Gold VIP Plan</p>
+                <p class="text-xs text-slate-400">Toggle whether Celebrity VIP Video Calling is enabled for Gold subscribers</p>
+              </div>
+              <div class="flex items-center space-x-3">
+                <span id="label-gold-video" class="text-xs text-emerald-400 font-semibold">VIP Video: ENABLED</span>
+                <button onclick="toggleAdminPlanRule('plan-gold', 'canCelebrityVideoCall')" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition">
+                  Toggle Rule
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- SECTION 8: CUSTOMER SUPPORT                   -->
+      <!-- ============================================== -->
+      <div id="section-support" class="hidden space-y-6">
+        <div>
+          <h2 class="text-2xl font-extrabold text-white">Customer Support & Helpdesk</h2>
+          <p class="text-slate-400 text-sm">Submit support requests, report inappropriate behavior, and chat with agents.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Submit Form -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+            <h3 class="font-bold text-white text-base">New Support Ticket</h3>
+            <div class="space-y-3">
+              <div>
+                <label class="text-[11px] font-bold text-slate-400 uppercase">Subject</label>
+                <input id="ticket-subject" type="text" placeholder="e.g. Call audio question" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500" />
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-400 uppercase">Category</label>
+                <select id="ticket-category" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+                  <option value="Technical">Technical & Audio Call</option>
+                  <option value="Billing">Billing & Membership</option>
+                  <option value="Safety">User Report & Safety</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-400 uppercase">Description</label>
+                <textarea id="ticket-desc" rows="3" placeholder="Describe the issue in detail..." class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brand-500"></textarea>
+              </div>
+              <button onclick="submitSupportTicket()" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition">
+                Submit Ticket
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Ticket List & Chat Thread -->
+          <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div class="flex items-center space-x-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                  <h4 class="font-bold text-white text-sm">Ticket #TICK-884219 – Audio Quality Diagnostics</h4>
+                </div>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 font-bold">IN_PROGRESS</span>
+              </div>
+
+              <!-- Message thread -->
+              <div id="support-messages-box" class="space-y-3 py-4 max-h-64 overflow-y-auto">
+                <div class="bg-slate-950 p-3 rounded-2xl rounded-tl-none border border-slate-800 max-w-sm text-xs">
+                  <p class="text-slate-400 text-[10px] mb-1 font-semibold">Alex Morgan (You):</p>
+                  <p class="text-slate-200">Hi, I'm verifying the voice call connection bitrate. Everything is sounding clear!</p>
+                </div>
+                <div class="bg-sky-950/40 p-3 rounded-2xl rounded-tr-none border border-sky-800/40 max-w-sm ml-auto text-xs">
+                  <p class="text-sky-400 text-[10px] mb-1 font-semibold">Sarah Jenkins (Support Agent):</p>
+                  <p class="text-slate-200">Hello Alex! We see your WebRTC audio stream has 0% packet loss and low jitter. Let us know if you need any adjustments!</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reply Box -->
+            <div class="flex items-center space-x-2 pt-2 border-t border-slate-800">
+              <input id="support-reply-input" type="text" placeholder="Type message to support..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500" />
+              <button onclick="sendSupportReply()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: AUDIO CALL IN-PROGRESS OVERLAY          -->
+  <!-- ============================================== -->
+  <div id="audio-call-modal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur flex items-center justify-center p-4">
+    <div class="max-w-sm w-full bg-slate-900 border border-brand-500/40 rounded-3xl p-8 text-center space-y-6 shadow-2xl shadow-brand-500/20">
+      <div class="relative w-28 h-28 mx-auto flex items-center justify-center">
+        <div class="absolute inset-0 rounded-full border-2 border-brand-500/50 animate-ping"></div>
+        <img id="call-avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" class="w-24 h-24 rounded-full object-cover border-4 border-brand-500 shadow-xl" />
+      </div>
+
+      <div>
+        <h3 id="call-partner-name" class="text-xl font-bold text-white">Samantha Chen</h3>
+        <p id="call-timer" class="text-xs font-mono text-brand-400 mt-1 font-semibold">Connected: 00:24</p>
+        <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20">WebRTC P2P Audio Encrypted</span>
+      </div>
+
+      <!-- In-call Controls -->
+      <div class="flex items-center justify-center space-x-4 pt-4">
+        <button onclick="toggleMute()" id="btn-mute" class="w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition" title="Toggle Mute">
+          <i data-lucide="mic" id="icon-mic" class="w-5 h-5"></i>
+        </button>
+        <button onclick="endActiveCall()" class="w-14 h-14 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-600/30 transition transform hover:scale-105" title="End Call">
+          <i data-lucide="phone-off" class="w-6 h-6"></i>
+        </button>
+        <button onclick="toggleSpeaker()" id="btn-speaker" class="w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition" title="Toggle Speaker">
+          <i data-lucide="volume-2" id="icon-speaker" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: VIP VIDEO CALL IN-PROGRESS OVERLAY     -->
+  <!-- ============================================== -->
+  <div id="vip-video-modal" class="hidden fixed inset-0 z-50 bg-slate-950 flex flex-col">
+    <!-- Remote Video View Area -->
+    <div class="relative flex-1 bg-slate-900 flex items-center justify-center overflow-hidden">
+      <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200" class="w-full h-full object-cover filter brightness-90" />
+      
+      <!-- Top Status Overlay -->
+      <div class="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
+        <div class="flex items-center space-x-3 bg-slate-950/80 backdrop-blur px-4 py-2 rounded-full border border-vip-500/40">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <div>
+            <p class="text-xs font-bold text-white flex items-center">Aria Sterling <i data-lucide="badge-check" class="w-3.5 h-3.5 text-vip-400 ml-1"></i></p>
+            <p id="vip-call-timer" class="text-[10px] font-mono text-vip-400">01:14 • $8.00/min</p>
+          </div>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-vip-500/20 border border-vip-500/40 text-vip-300 text-xs font-bold">VIP VIDEO ROOM</span>
+      </div>
+
+      <!-- Local PIP Camera (Bottom Right) -->
+      <div class="absolute bottom-24 right-6 w-32 h-44 rounded-2xl overflow-hidden border-2 border-brand-500 shadow-2xl bg-slate-950">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300" class="w-full h-full object-cover" />
+      </div>
+
+      <!-- Floating Controls -->
+      <div class="absolute bottom-6 inset-x-0 flex items-center justify-center space-x-4">
+        <button class="w-12 h-12 rounded-full bg-slate-900/90 hover:bg-slate-800 text-white flex items-center justify-center border border-slate-700 transition">
+          <i data-lucide="camera" class="w-5 h-5"></i>
+        </button>
+        <button class="w-12 h-12 rounded-full bg-slate-900/90 hover:bg-slate-800 text-white flex items-center justify-center border border-slate-700 transition">
+          <i data-lucide="mic" class="w-5 h-5"></i>
+        </button>
+        <button onclick="endVipVideoCall()" class="w-14 h-14 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center shadow-xl shadow-red-600/40 transition">
+          <i data-lucide="phone-off" class="w-6 h-6"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ALERT & PERMISSION NOTICES             -->
+  <!-- ============================================== -->
+  <div id="notice-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur flex items-center justify-center p-4">
+    <div class="max-w-sm w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 text-center space-y-4 shadow-2xl">
+      <div id="notice-icon-box" class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 mx-auto flex items-center justify-center">
+        <i data-lucide="alert-triangle" class="w-7 h-7"></i>
+      </div>
+      <div>
+        <h4 id="notice-title" class="text-lg font-bold text-white">Permission Restriction</h4>
+        <p id="notice-message" class="text-xs text-slate-300 mt-2 leading-relaxed">Video calling is not permitted between normal users.</p>
+      </div>
+      <button onclick="closeNoticeModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition">Understood</button>
+    </div>
+  </div>
+
+  <!-- Core Interactive Script -->
+  <script>
+    // State
+    let currentUser = {
+      id: 'usr-alex-01',
+      name: 'Alex Morgan',
+      role: 'NORMAL_USER',
+      planSlug: 'gold',
+      planName: 'Gold VIP',
+      credits: 35,
+      canAudioCall: true,
+      canVideoCall: false, // Normal video is strictly false
+      canCelebVideo: true
+    };
+
+    let callTimerInterval = null;
+    let callSeconds = 0;
+
+    // Navigation Handler
+    function navigateTo(section) {
+      document.querySelectorAll('#main-content > div').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.remove('bg-brand-600/20', 'text-brand-400', 'border', 'border-brand-500/30');
+        el.classList.add('text-slate-400');
+      });
+
+      const target = document.getElementById(`section-${section}`);
+      const navBtn = document.getElementById(`nav-${section}`);
+      if (target) target.classList.remove('hidden');
+      if (navBtn) {
+        navBtn.classList.remove('text-slate-400');
+        navBtn.classList.add('bg-brand-600/20', 'text-brand-400', 'border', 'border-brand-500/30');
+      }
+    }
+
+    // Role Switcher for Seamless Testing
+    function switchRole(userId) {
+      if (userId === 'usr-alex-01') {
+        currentUser = { id: 'usr-alex-01', name: 'Alex Morgan', role: 'NORMAL_USER', planSlug: 'gold', planName: 'Gold VIP', credits: 35, canAudioCall: true, canCelebVideo: true };
+      } else if (userId === 'usr-sam-02') {
+        currentUser = { id: 'usr-sam-02', name: 'Samantha Chen', role: 'NORMAL_USER', planSlug: 'silver', planName: 'Silver Connect', credits: 10, canAudioCall: true, canCelebVideo: false };
+      } else if (userId === 'usr-david-03') {
+        currentUser = { id: 'usr-david-03', name: 'David Kim', role: 'NORMAL_USER', planSlug: 'free', planName: 'Free Basic', credits: 0, canAudioCall: false, canCelebVideo: false };
+      } else if (userId === 'usr-celeb-01') {
+        currentUser = { id: 'usr-celeb-01', name: 'Aria Sterling', role: 'CELEBRITY', planSlug: 'gold', planName: 'Verified Creator', credits: 500, canAudioCall: true, canCelebVideo: true };
+      } else if (userId === 'usr-admin-01') {
+        currentUser = { id: 'usr-admin-01', name: 'Super Admin', role: 'SUPER_ADMIN', planSlug: 'gold', planName: 'Super Admin', credits: 9999, canAudioCall: true, canCelebVideo: true };
+      }
+
+      // Update UI Header
+      document.getElementById('header-name').textContent = currentUser.name;
+      document.getElementById('header-plan').textContent = currentUser.planName;
+      document.getElementById('hud-credits').textContent = `${currentUser.credits} Credits`;
+      document.getElementById('hud-audio-perm').innerHTML = currentUser.canAudioCall ? 
+        `<i data-lucide="check" class="w-3 h-3 mr-0.5"></i> Allowed` : 
+        `<i data-lucide="x" class="w-3 h-3 mr-0.5 text-red-400"></i> Upgr. Required`;
+      document.getElementById('hud-vip-perm').innerHTML = currentUser.canCelebVideo ? 
+        `<i data-lucide="crown" class="w-3 h-3 mr-0.5"></i> Gold VIP` : 
+        `<i data-lucide="lock" class="w-3 h-3 mr-0.5 text-slate-500"></i> Locked`;
+
+      lucide.createIcons();
+      showNotice('Switched Active User', `Now interacting as: ${currentUser.name} (${currentUser.planName})`);
+    }
+
+    // Radar Search Simulation
+    let isSearching = false;
+    function toggleRadarSearch() {
+      const statusText = document.getElementById('radar-status-text');
+      const label = document.getElementById('radar-label');
+      const matchCard = document.getElementById('match-card');
+
+      if (!isSearching) {
+        isSearching = true;
+        label.textContent = "Searching...";
+        statusText.textContent = "Scanning online network for compatible friends with matching interests...";
+        matchCard.classList.add('hidden');
+
+        setTimeout(() => {
+          if (isSearching) {
+            isSearching = false;
+            label.textContent = "Match Found!";
+            statusText.textContent = "Compatible user discovered! Review their profile below:";
+            matchCard.classList.remove('hidden');
+          }
+        }, 2200);
+      } else {
+        isSearching = false;
+        label.textContent = "Find Friend";
+        statusText.textContent = "Search cancelled.";
+      }
+    }
+
+    function acceptMatch() {
+      document.getElementById('match-card').classList.add('hidden');
+      initiateAudioCall('usr-sam-02', 'Samantha Chen');
+    }
+
+    function rejectMatch() {
+      document.getElementById('match-card').classList.add('hidden');
+      document.getElementById('radar-status-text').textContent = "Match skipped. Press Find Friend to search again.";
+      document.getElementById('radar-label').textContent = "Find Friend";
+    }
+
+    // Audio Call Verification & Execution
+    function initiateAudioCall(calleeId, calleeName) {
+      if (!currentUser.canAudioCall) {
+        showNotice('Upgrade Required For Audio Calling', 'Audio calling is not available on your Free Basic plan. Please upgrade to Silver Connect or Gold VIP to enable friend voice calls.');
+        return;
+      }
+
+      document.getElementById('call-partner-name').textContent = calleeName;
+      document.getElementById('audio-call-modal').classList.remove('hidden');
+
+      callSeconds = 0;
+      clearInterval(callTimerInterval);
+      callTimerInterval = setInterval(() => {
+        callSeconds++;
+        const mins = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+        const secs = String(callSeconds % 60).padStart(2, '0');
+        document.getElementById('call-timer').textContent = `Connected: ${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function endActiveCall() {
+      clearInterval(callTimerInterval);
+      document.getElementById('audio-call-modal').classList.add('hidden');
+      showNotice('Call Ended', `Call completed. Total duration: ${callSeconds} seconds.`);
+    }
+
+    function showVideoDisabledPrompt() {
+      showNotice(
+        'Video Calling Prohibited Between Normal Users',
+        'Normal user-to-user video calling is disabled across the platform. Video calls are exclusively reserved for verified VIP Celebrity engagements.'
+      );
+    }
+
+    // Celebrity VIP Video Call
+    function requestCelebCall(celebId, celebName, type, rate) {
+      if (type === 'VIDEO') {
+        if (!currentUser.canCelebVideo) {
+          showNotice('Gold VIP Membership Required', 'Celebrity VIP video calling requires an active Gold VIP subscription. Please upgrade your membership to unlock video calls with Aria Sterling.');
+          return;
+        }
+        if (currentUser.credits < rate) {
+          showNotice('Insufficient Calling Credits', `Celebrity VIP video calls require at least ${rate} credits. Please recharge your wallet.`);
+          return;
+        }
+        document.getElementById('vip-video-modal').classList.remove('hidden');
+      } else {
+        if (currentUser.planSlug === 'free' && currentUser.credits < rate) {
+          showNotice('Upgrade Required For Celebrity Calls', 'Celebrity audio calling requires an active Silver/Gold plan or calling credits.');
+          return;
+        }
+        initiateAudioCall(celebId, celebName);
+      }
+    }
+
+    function endVipVideoCall() {
+      document.getElementById('vip-video-modal').classList.add('hidden');
+      showNotice('VIP Video Session Ended', 'Your VIP session with Aria Sterling has concluded.');
+    }
+
+    // Booking Simulation
+    function openBookingModal(eventId, eventTitle) {
+      showNotice('Booking Confirmed!', `Successfully reserved 2 tickets for ${eventTitle}. Your digital QR boarding pass is available in the pass viewer below.`);
+      document.getElementById('digital-ticket-box').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function simulateScanCheckin() {
+      showNotice('Attendee Checked In!', 'Gate scanner validated digital QR hash. Status updated to: CHECKED_IN.');
+    }
+
+    // Plan Upgrades
+    function upgradePlan(planSlug) {
+      if (planSlug === 'silver') {
+        currentUser.planSlug = 'silver';
+        currentUser.planName = 'Silver Connect';
+        currentUser.canAudioCall = true;
+        currentUser.canCelebVideo = false;
+        currentUser.credits += 10;
+      } else if (planSlug === 'gold') {
+        currentUser.planSlug = 'gold';
+        currentUser.planName = 'Gold VIP';
+        currentUser.canAudioCall = true;
+        currentUser.canCelebVideo = true;
+        currentUser.credits += 50;
+      }
+      switchRole(currentUser.id);
+      showNotice('Membership Upgraded!', `You are now on the ${currentUser.planName}. Calling permissions updated.`);
+    }
+
+    // Support Form & Chat
+    function submitSupportTicket() {
+      const subject = document.getElementById('ticket-subject').value;
+      if (!subject) return;
+      showNotice('Support Ticket Submitted', `Ticket created with tracking number TICK-${Math.floor(100000 + Math.random() * 900000)}. Support staff will respond promptly.`);
+      document.getElementById('ticket-subject').value = '';
+      document.getElementById('ticket-desc').value = '';
+    }
+
+    function sendSupportReply() {
+      const input = document.getElementById('support-reply-input');
+      const val = input.value.trim();
+      if (!val) return;
+
+      const box = document.getElementById('support-messages-box');
+      const msg = document.createElement('div');
+      msg.className = "bg-slate-950 p-3 rounded-2xl rounded-tl-none border border-slate-800 max-w-sm text-xs";
+      msg.innerHTML = `<p class="text-slate-400 text-[10px] mb-1 font-semibold">${currentUser.name} (You):</p><p class="text-slate-200">${val}</p>`;
+      box.appendChild(msg);
+      input.value = '';
+      box.scrollTop = box.scrollHeight;
+    }
+
+    // Admin Dynamic Rule Toggles
+    function toggleAdminPlanRule(planId, rule) {
+      if (planId === 'plan-silver' && rule === 'canUserAudioCall') {
+        const el = document.getElementById('label-silver-audio');
+        const isEnabled = el.textContent.includes('ENABLED');
+        el.textContent = isEnabled ? 'Audio Calls: DISABLED' : 'Audio Calls: ENABLED';
+        el.className = isEnabled ? 'text-xs text-red-400 font-semibold' : 'text-xs text-emerald-400 font-semibold';
+        showNotice('Admin Rule Updated', `Silver Plan audio calling permission set to: ${isEnabled ? 'DISABLED' : 'ENABLED'}. All users on Silver plan are immediately updated.`);
+      } else if (planId === 'plan-gold' && rule === 'canCelebrityVideoCall') {
+        const el = document.getElementById('label-gold-video');
+        const isEnabled = el.textContent.includes('ENABLED');
+        el.textContent = isEnabled ? 'VIP Video: DISABLED' : 'VIP Video: ENABLED';
+        el.className = isEnabled ? 'text-xs text-red-400 font-semibold' : 'text-xs text-emerald-400 font-semibold';
+        showNotice('Admin Rule Updated', `Gold VIP Video Calling permission set to: ${isEnabled ? 'DISABLED' : 'ENABLED'}.`);
+      }
+    }
+
+    // Modal Helpers
+    function showNotice(title, message) {
+      document.getElementById('notice-title').textContent = title;
+      document.getElementById('notice-message').textContent = message;
+      document.getElementById('notice-modal').classList.remove('hidden');
+    }
+
+    function closeNoticeModal() {
+      document.getElementById('notice-modal').classList.add('hidden');
+    }
+
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    function blockUser(id) {
+      showNotice('User Blocked', 'User has been added to your blocklist. The matchmaker will never pair you with them again.');
+    }
+
+    function toggleMute() {
+      const icon = document.getElementById('icon-mic');
+      icon.classList.toggle('text-red-400');
+    }
+
+    function toggleSpeaker() {
+      const icon = document.getElementById('icon-speaker');
+      icon.classList.toggle('text-brand-400');
+    }
+
+    // Initialize Lucide icons on load
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
+

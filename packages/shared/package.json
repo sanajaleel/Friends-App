@@ -1,0 +1,17 @@
+{
+  "name": "@friends-app/shared",
+  "version": "1.0.0",
+  "description": "Shared types, DTOs, and validation schemas for Friends App",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
+
